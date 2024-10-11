@@ -5,7 +5,7 @@ from .render import Renderer
 from game_module.game import IGame
 
 from pygame import init
-from pygame import event, QUIT
+from pygame import event, KEYDOWN, QUIT
 from pygame.display import set_caption
 
 
@@ -15,7 +15,7 @@ class App:
         init()
 
         self.input = Input()
-        self.time = Time()
+        self.time = Time(fps_limit=30)
         self.renderer = Renderer(screen_width, screen_height)
 
         set_caption("2048 Game")
@@ -29,15 +29,18 @@ class App:
         while self._running:
             self.time.update()
             self._poll_events()
-            self.game.handle_input(self.input)
-            self.game.update(self.time.dt)
-            self.game.render(self.renderer)
+            if not self.game.game_over:
+                self.game.update(self.time.dt)
+                self.game.render(self.renderer)
             self.renderer.render()
 
     def _poll_events(self):
         for e in event.get():
             if e.type == QUIT:
                 self.exit_app()
+
+            if e.type == KEYDOWN:
+                self.game.handle_input(self.input)
 
     def exit_app(self):
         self._running = False

@@ -23,15 +23,16 @@ class Renderer:
         colors: dict[int, tuple[int, int, int]],
         size: int,
         padding: int,
+        score: int,
     ):
-        cell_size = min(self.get_width(), self.get_height()) // (size + 1)
+        cell_size = min(self.get_width(), self.get_height()) // (size + 2)
 
         # Calculate top-left position of grid to center it
         width = size * cell_size + (size - 1) * padding
         height = width  # Using square grid
 
         start_x = (self.get_width() - width) // 2
-        start_y = (self.get_height() - height) // 2
+        start_y = (self.get_height() - height) // 2 + 20
 
         # Draw background rectangle for the grid
         rect(
@@ -44,6 +45,13 @@ class Renderer:
                 height + 2 * padding,
             ),
         )
+
+        score_font = Font(None, 36)
+        score_text = score_font.render(f"Score: {score}", True, (0, 0, 0))
+        score_rect = score_text.get_rect(
+            center=(self.get_width() // 2, start_y - cell_size // 2)
+        )
+        self._screen.blit(score_text, score_rect)
 
         for row in range(size):
             for col in range(size):
