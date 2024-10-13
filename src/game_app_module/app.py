@@ -2,7 +2,7 @@ from .time import Time
 from .input import Input
 from .render import Renderer
 
-from game_module.game import IGame
+from game_environment.game import IGame
 
 from pygame import init
 from pygame import event, KEYDOWN, QUIT
@@ -29,7 +29,7 @@ class App:
         while self._running:
             self.time.update()
             self._poll_events()
-            if not self.game.game_over:
+            if not self.game.is_done():
                 self.game.update(self.time.dt)
                 self.game.render(self.renderer)
             self.renderer.render()

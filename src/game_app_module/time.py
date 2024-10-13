@@ -5,7 +5,7 @@ class Time:
     def __init__(self, fps_limit: int = 60):
         self._clock = Clock()
 
-        # deltatime
+        # Deltatime
         self.dt: float = 0.0
         self.fps_limit: int = fps_limit
 

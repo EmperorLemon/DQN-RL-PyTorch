@@ -1,12 +1,35 @@
 from game_app_module.app import App
-from game_module.game import Game
+
+from game_environment.game import Game
+from game_environment.env import GameEnv
+
+from tensorboardX import SummaryWriter
+
+from utils.globals import *
+from utils.utils import *
+from config import HYPERPARAMETERS
+
+import torch
+import time
+
+MAX_MEMORY_CAP = 50000
+MAX_NUM_EPISODES = 1000
 
 
 def main() -> int:
-    game = Game()
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    writer = SummaryWriter(
+        join_path(join_path(LOG_DIR, "runs"), f"2048_DQN_{time.time()}")
+    )
+
+    env = GameEnv()
+    game = Game(env)
 
     app = App(800, 600, game)
     app.run()
+
+    writer.close()
 
     return 0
 

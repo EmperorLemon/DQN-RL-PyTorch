@@ -6,7 +6,6 @@ from pygame.font import Font
 class Renderer:
     def __init__(self, width: int, height: int):
         self._screen = set_mode((width, height))
-        self._font = Font(None, 36)
 
     def clear_color(self, color):
         self._screen.fill(color=color)
@@ -17,18 +16,16 @@ class Renderer:
     def get_height(self) -> int:
         return self._screen.get_height()
 
-    def draw_grid(
+    def draw_board(
         self,
-        grid: list[list[int]],
-        colors: dict[int, tuple[int, int, int]],
-        size: int,
+        board,
+        colors,
         padding: int,
-        score: int,
     ):
-        cell_size = min(self.get_width(), self.get_height()) // (size + 2)
+        cell_size = min(self.get_width(), self.get_height()) // (board.size + 2)
 
         # Calculate top-left position of grid to center it
-        width = size * cell_size + (size - 1) * padding
+        width = board.size * cell_size + (board.size - 1) * padding
         height = width  # Using square grid
 
         start_x = (self.get_width() - width) // 2
@@ -46,16 +43,9 @@ class Renderer:
             ),
         )
 
-        score_font = Font(None, 36)
-        score_text = score_font.render(f"Score: {score}", True, (0, 0, 0))
-        score_rect = score_text.get_rect(
-            center=(self.get_width() // 2, start_y - cell_size // 2)
-        )
-        self._screen.blit(score_text, score_rect)
-
-        for row in range(size):
-            for col in range(size):
-                value = grid[row][col]
+        for row in range(board.size):
+            for col in range(board.size):
+                value = board[row, col]
 
                 # Calculate position for this cell
                 x = start_x + col * (cell_size + padding)
@@ -69,11 +59,15 @@ class Renderer:
                 )
 
                 if value != 0:
-                    text_surface = self._font.render(str(value), True, (0, 0, 0))
-                    text_rect = text_surface.get_rect(
-                        center=(x + cell_size // 2, y + cell_size // 2)
+                    self.draw_text(
+                        text=str(value), center=(x + cell_size // 2, y + cell_size // 2)
                     )
-                    self._screen.blit(text_surface, text_rect)
+
+    def draw_text(self, text, center=(0, 0), color=(0, 0, 0)):
+        font = Font(None, 36)
+        text_surface = font.render(text, True, color)
+        text_rect = text_surface.get_rect(center=center)
+        self._screen.blit(text_surface, text_rect)
 
     def render(self):
         flip()
