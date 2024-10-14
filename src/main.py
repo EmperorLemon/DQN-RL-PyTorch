@@ -4,6 +4,7 @@ from game_environment.game import Game
 from game_environment.env import GameEnv
 
 from ai_module.agent import DQNAgent
+from ai_module.train import Trainer
 
 from tensorboardX import SummaryWriter
 
@@ -12,22 +13,18 @@ from utils.utils import *
 from config import HYPERPARAMETERS
 
 import torch
-import time
 
 
 def main() -> int:
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    writer = SummaryWriter(
-        join_path(join_path(LOG_DIR, "runs"), f"2048_DQN_{time.time()}")
-    )
+    writer = SummaryWriter(get_log_path(LOG_DIR, "2048_DQN"))
 
+    agent = DQNAgent(device, writer, HYPERPARAMETERS)
     env = GameEnv(size=4)
-    agent = DQNAgent(
-        env,
-    )
+    agent.create_agent_models(env.state_size, env.action_size)
 
-    game = Game(env)
+    game = Game(env, ai_agent=agent)
 
     app = App(800, 600, game)
     app.run()

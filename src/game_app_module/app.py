@@ -15,7 +15,7 @@ class App:
         init()
 
         self.input = Input()
-        self.time = Time(fps_limit=30)
+        self.time = Time(fps_limit=165)
         self.renderer = Renderer(screen_width, screen_height)
 
         set_caption("2048 Game")

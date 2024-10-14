@@ -1,2 +1,8 @@
+from torch import nn
+
+from typing import Type
+
+
 class Trainer:
-    pass
+    def __init__(self):
+        pass

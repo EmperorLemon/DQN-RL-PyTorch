@@ -22,24 +22,22 @@ BOARD_COLORS = {
 class Board:
     def __init__(self, size=4):
         self.size = size
-        self._board = None
-
-        self.reset()
+        self.board = np.zeros((self.size, self.size), dtype=int)
 
     def __getitem__(self, key):
-        return self._board[key]
+        return self.board[key]
 
     def __setitem__(self, key, value):
-        self._board[key] = value
+        self.board[key] = value
 
     def get_board(self) -> np.ndarray:
-        return self._board
+        return self.board
 
     def set_board(self, board: np.ndarray):
-        self._board = board
+        self.board = board
 
     def reset(self):
-        self._board = np.zeros((self.size, self.size), dtype=int)
+        self.board = np.zeros((self.size, self.size), dtype=int)
 
         self.spawn_tile()
         self.spawn_tile()
@@ -47,28 +45,38 @@ class Board:
     # Add new tile to the board.
     def spawn_tile(self):
         # Find all empty cells in board
-        empty_cells = np.argwhere(self._board == 0)
+        empty_cells = np.argwhere(self.board == 0)
 
         # If there are empty cells on the board
         if empty_cells.size > 0:
             i, j = random.choice(empty_cells)
-            self._board[i, j] = 2 if random.random() < 0.9 else 4
+            self.board[i, j] = 2 if random.random() < 0.9 else 4
 
     def __str__(self):
         return "\n".join(
-            [" ".join([f"{tile:4}" for tile in row]) for row in self._board]
+            [" ".join([f"{tile:4}" for tile in row]) for row in self.board]
         )
 
 
 class BoardLogic:
     @staticmethod
-    def move(board: np.ndarray, action: int) -> tuple[np.ndarray, bool, float]:
-        original_board = board.copy()
+    def move(board: np.ndarray, action: int) -> tuple[np.ndarray, bool, int]:
+        """
+        Perform a move on the board.
 
-        reward: float = 0.0
+        Args:
+            board (np.ndarray): The current game board.
+            action (int): The action to perform (UP, DOWN, LEFT, RIGHT).
+
+        Returns:
+            Tuple[np.ndarray, bool, int]: New board state, whether move was valid, and score.
+        """
+
+        original_board = board.copy()
+        score: int = 0
 
         def merge(row):
-            nonlocal reward
+            nonlocal score
 
             # Remove zeros and get non-zero values
             row = row[row != 0]
@@ -77,7 +85,7 @@ class BoardLogic:
             for i in range(len(row) - 1):
                 if row[i] == row[i + 1]:
                     row[i] *= 2
-                    reward += np.log2(row[i])
+                    score += row[i]
                     row[i + 1] = 0
 
             # Remove zeros again and pad with zeros
@@ -95,7 +103,9 @@ class BoardLogic:
         else:
             raise ValueError(f"Invalid action: {action}")
 
-        return board, not np.array_equal(original_board, board), reward
+        is_valid_move: bool = not np.array_equal(original_board, board)
+
+        return board, is_valid_move, score
 
     @staticmethod
     def game_over(board: np.ndarray) -> bool:
@@ -103,12 +113,10 @@ class BoardLogic:
         if np.any(board == 0):
             return False
 
-        # Check for possible horizontal merges
-        if np.any(board[:, :-1] == board[:, 1:]):
-            return False
-
-        # Check for possible vertical merges
-        if np.any(board[:-1, :] == board[1:, :]):
+        # Check for possible vertical or horizontal merges
+        if np.any(board[:, :-1] == board[:, 1:]) or np.any(
+            board[:-1, :] == board[1:, :]
+        ):
             return False
 
         return True

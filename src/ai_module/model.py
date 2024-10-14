@@ -14,16 +14,18 @@ class DQN(nn.Module):
         in_features = input_size
         for hidden_size in hidden_layers:
             layers.append(nn.Linear(in_features, hidden_size))
-            layers.append(nn.BatchNorm1d(hidden_size))
+            # layers.append(nn.BatchNorm1d(hidden_size))
             layers.append(nn.ReLU())
 
             in_features = hidden_size
 
-        layers.append(in_features, output_size)
+        # Output layer
+        layers.append(nn.Linear(in_features, output_size))
 
         return nn.Sequential(*layers)
 
     def forward(self, X):
-        x = self.q_net(X)
+        if X.dim() == 1:
+            X = X.unsqueeze(0)
 
-        return x
+        return self.q_net(X)
