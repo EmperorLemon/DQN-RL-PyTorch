@@ -62,10 +62,14 @@ class Board:
 
 class BoardLogic:
     @staticmethod
-    def move(board: np.ndarray, action: int) -> tuple[np.ndarray, bool]:
+    def move(board: np.ndarray, action: int) -> tuple[np.ndarray, bool, float]:
         original_board = board.copy()
 
+        reward: float = 0.0
+
         def merge(row):
+            nonlocal reward
+
             # Remove zeros and get non-zero values
             row = row[row != 0]
 
@@ -73,6 +77,7 @@ class BoardLogic:
             for i in range(len(row) - 1):
                 if row[i] == row[i + 1]:
                     row[i] *= 2
+                    reward += np.log2(row[i])
                     row[i + 1] = 0
 
             # Remove zeros again and pad with zeros
@@ -90,7 +95,7 @@ class BoardLogic:
         else:
             raise ValueError(f"Invalid action: {action}")
 
-        return board, not np.array_equal(original_board, board)
+        return board, not np.array_equal(original_board, board), reward
 
     @staticmethod
     def game_over(board: np.ndarray) -> bool:

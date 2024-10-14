@@ -29,9 +29,8 @@ class App:
         while self._running:
             self.time.update()
             self._poll_events()
-            if not self.game.is_done():
-                self.game.update(self.time.dt)
-                self.game.render(self.renderer)
+            self.game.update(self.time.dt)
+            self.game.render(self.renderer)
             self.renderer.render()
 
     def _poll_events(self):

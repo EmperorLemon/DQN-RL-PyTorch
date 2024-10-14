@@ -46,13 +46,13 @@ class Game(IGame):
 
     def handle_input(self, input):
         if input.get_key_down(K_UP):
-            print(self.env.step(ACTION_UP))
+            self.env.step(ACTION_UP)
         elif input.get_key_down(K_DOWN):
-            print(self.env.step(ACTION_DOWN))
+            self.env.step(ACTION_DOWN)
         elif input.get_key_down(K_LEFT):
-            print(self.env.step(ACTION_LEFT))
+            self.env.step(ACTION_LEFT)
         elif input.get_key_down(K_RIGHT):
-            print(self.env.step(ACTION_RIGHT))
+            self.env.step(ACTION_RIGHT)
 
     def is_done(self) -> bool:
         return self.env.done

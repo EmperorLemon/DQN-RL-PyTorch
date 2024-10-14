@@ -1,45 +1,46 @@
+from abc import ABC, abstractmethod
 from .board import Board, BoardLogic
 
 import numpy as np
 
 
-class GameEnv:
-    def __init__(self, size: int = 4, seed: int = 42, move_penalty: float = 0.1):
+class IEnv(ABC):
+    @abstractmethod
+    def reset(self):
+        pass
+
+    @abstractmethod
+    def step(self, action):
+        pass
+
+
+class GameEnv(IEnv):
+    def __init__(self, size: int = 4):
         self.state_size = size * size
         self.action_size = 4
 
-        np.random.seed(seed)
-
-        self.move_penalty = move_penalty
-
         self.game_board = Board(size=size)
 
-    def reset(self, step_penalty: float = 0.0):
+    def reset(self):
+        self.game_board.reset()
+
         self.score = np.sum(self.game_board.get_board())
         self.reward = 0
 
-        self.current_move_penalty = 0
         self.done = False
 
-        self.rewards_list = []
-        self.scores_list = []
-
-        self.steps = 0
-        self.step_penalty = step_penalty
-
-        self.memory = []
-
     def step(self, action):
-        board, moved = BoardLogic.move(self.game_board.get_board(), action)
+        board, valid_move, reward = BoardLogic.move(self.game_board.get_board(), action)
 
-        if not moved:
-            return (self.game_board.get_board(), 0, self.done)
+        if not valid_move:
+            pass
 
-        self.reward = self.reward - self.step_penalty
-        self.score = np.sum(self.game_board.get_board())
-        self.done = BoardLogic.game_over(board)
+        self.reward += reward
 
         self.game_board.set_board(board)
         self.game_board.spawn_tile()
+
+        self.score = np.sum(self.game_board.get_board())
+        self.done = BoardLogic.game_over(self.game_board.get_board())
 
         return (board, self.reward, self.done)
