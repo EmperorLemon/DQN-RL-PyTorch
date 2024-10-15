@@ -1,10 +1,11 @@
-from game_app_module.app import App
+# from game_app_module.app import App
 
-from game_environment.game import Game
+# from game_environment.game import Game
 from game_environment.env import GameEnv
 
 from ai_module.agent import DQNAgent
 from ai_module.train import Trainer
+from ai_module.utils import check_cuda
 
 from tensorboardX import SummaryWriter
 
@@ -12,22 +13,21 @@ from utils.globals import *
 from utils.utils import *
 from config import HYPERPARAMETERS
 
-import torch
-
-
 def main() -> int:
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
+    check_cuda()
+    
     writer = SummaryWriter(get_log_path(LOG_DIR, "2048_DQN"))
 
-    agent = DQNAgent(device, writer, HYPERPARAMETERS)
     env = GameEnv(size=4)
-    agent.create_agent_models(env.state_size, env.action_size)
+    agent = DQNAgent(env.state_size, env.action_size, HYPERPARAMETERS)
+    
+    trainer = Trainer(env=env, agent=agent, writer=writer, config=HYPERPARAMETERS)
+    trainer.train()
 
-    game = Game(env, ai_agent=agent)
+    # game = Game(env)
 
-    app = App(800, 600, game)
-    app.run()
+    # app = App(800, 600, game)
+    # app.run()
 
     writer.close()
 

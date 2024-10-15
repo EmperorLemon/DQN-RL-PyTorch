@@ -1,11 +1,9 @@
 HYPERPARAMETERS = {
-    "BATCH_SIZE": 128,
-    "BUFFER_SIZE": 10000,
-    "NUM_EPISODES": 1000,
-    "UPDATE_RATE": 10,
-    "GAMMA": 0.99,
-    "EPS_START": 1.0,
-    "EPS_END": 0.05,
-    "EPS_DECAY": 0.9995,
+    "BATCH_SIZE": 256,
+    "MAX_EPISODES": 5,
+    "EPS_START": 0.9,
+    "EPS_END": 1e-4,
+    "EPS_DECAY": 0.99,
     "LR": 1e-4,
+    "HIDDEN_LAYERS": [128, 128]
 }
