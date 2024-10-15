@@ -60,7 +60,7 @@ class Board:
 
 class BoardLogic:
     @staticmethod
-    def move(board: np.ndarray, action: int) -> tuple[np.ndarray, bool, int]:
+    def move(prev_board: np.ndarray, board: np.ndarray, action: int) -> tuple[bool, int]:
         """
         Perform a move on the board.
 
@@ -71,8 +71,6 @@ class BoardLogic:
         Returns:
             Tuple[np.ndarray, bool, int]: New board state, whether move was valid, and score.
         """
-
-        original_board = board.copy()
         score: int = 0
 
         def merge(row):
@@ -103,9 +101,30 @@ class BoardLogic:
         else:
             raise ValueError(f"Invalid action: {action}")
 
-        is_valid_move: bool = not np.array_equal(original_board, board)
+        is_valid_move: bool = not np.array_equal(prev_board, board)
 
-        return board, is_valid_move, score
+        return is_valid_move, score
+    
+    @staticmethod
+    def get_valid_actions(board: np.ndarray) -> list[int]:
+        valid_actions = []
+        
+        # Define actions and their weights
+        actions = {ACTION_UP: 1.0, ACTION_DOWN: 3.0, ACTION_LEFT: 3.0, ACTION_RIGHT: 2.0}
+        
+        score = 0 
+        
+        for action, weight in actions.items():
+            # Create a copy of the board
+            temp_board = board.copy()
+            
+            valid_move, merged_score = BoardLogic.move(temp_board, board, action)
+            
+            if valid_move:
+                score += merged_score
+                valid_actions.append(action)
+            
+        return valid_actions
 
     @staticmethod
     def game_over(board: np.ndarray) -> bool:
@@ -114,9 +133,7 @@ class BoardLogic:
             return False
 
         # Check for possible vertical or horizontal merges
-        if np.any(board[:, :-1] == board[:, 1:]) or np.any(
-            board[:-1, :] == board[1:, :]
-        ):
+        if np.any(board[:, :-1] == board[:, 1:]) or np.any(board[:-1, :] == board[1:, :]):
             return False
 
         return True
