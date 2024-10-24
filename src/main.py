@@ -13,13 +13,15 @@ from utils.globals import *
 from utils.utils import *
 from config import HYPERPARAMETERS
 
+BOARD_SIZE = 4
+
 def main() -> int:
     check_cuda()
     
     writer = SummaryWriter(get_log_path(LOG_DIR, "2048_DQN"))
-
-    env = GameEnv(size=4)
-    agent = DQNAgent(env.state_size, env.action_size, HYPERPARAMETERS)
+    
+    env = GameEnv(BOARD_SIZE)
+    agent = DQNAgent(BOARD_SIZE, HYPERPARAMETERS)
     
     trainer = Trainer(env=env, agent=agent, writer=writer, config=HYPERPARAMETERS)
     trainer.train()

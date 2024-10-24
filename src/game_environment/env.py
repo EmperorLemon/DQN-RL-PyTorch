@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from .board import Board, BoardLogic
 
-from ai_module.agent import DQNAgent
+from utils.globals import ACTION_SET
 
 import numpy as np
 
@@ -21,55 +21,79 @@ class IEnv(ABC):
 
 
 class GameEnv(IEnv):
-    def __init__(self, size: int):
-        self.state_size = size * size
-        self.action_size = 4
-        self.max_steps = 1000  # Maximum steps per episode
-
-        self.game_board = Board(size=size)
-        self.steps = 0
+    def __init__(self, board_size: int):
+        self.board_size = board_size
+        self.board = Board(size=board_size)
+        
         self.score = 0
-        self.done = False
+        self.episode_reward = 0
 
     def reset(self):
-        self.game_board.reset()
+        self.board.reset()
 
-        self.steps = 0
         self.score = 0
-        self.done = False
+        self.episode_reward = 0
 
         return self.get_state()
+    
+    def _board(self):
+        return self.board.get_board()
+    
+    def get_valid_actions(self):
+        valid_actions = []
+        
+        for action in ACTION_SET:
+            _, valid_move, _ = BoardLogic.move(self._board(), action)
+            
+            if valid_move:
+                valid_actions.append(action)
+                
+        return valid_actions
 
-    def step(self, action):
-        self.steps += 1
-
-        board, valid_move, merge_score = BoardLogic.move(
-            self.game_board.get_board(), action
-        )
+    def step(self, action) -> tuple[np.ndarray, float, bool]:
+        if action not in self.get_valid_actions():
+            return self.get_state(), 0, self.done
+        
+        prev_max_tile = np.max(self._board())
+        
+        new_board, valid_move, move_score = BoardLogic.move(self._board(), action)
 
         if valid_move:
-            self.game_board.set_board(board)
-            self.game_board.spawn_tile()
-            self.score += merge_score
-            self.reward = merge_score
+            self.board.set_board(new_board)
+            self.board.spawn_tile()
+            
+            self.score += move_score
+            
+            max_tile = np.max(self._board())
+            
+            move_reward = np.log2(move_score + 1)
+            new_tile_reward = (2 ** (np.log2(max_tile) - np.log2(prev_max_tile)) 
+                               if max_tile > prev_max_tile else 0)
+            
+            empty_spaces_reward = 0.1 * np.sum(self._board() == 0)
+            
+            reward = move_reward + new_tile_reward + empty_spaces_reward + 0.1
         else:
-            # Penalize non-merging moves
-            self.reward = -1
+            # Penalize invalid moves
+            reward = -2
+        
+        done = BoardLogic.game_over(self._board())
+            
+        if done:
+            reward -= 10
+            
+        self.episode_reward += reward
 
-        self.done = (
-            BoardLogic.game_over(self.game_board.get_board())
-            or self.steps >= self.max_steps
-        )
+        return self.get_state(), reward, done
 
-        return (self.get_state(), self.reward, self.done)
-
-    # Get flattened state
     def get_state(self) -> np.ndarray:
-        state = self.game_board.get_board().flatten()
-        return np.log2(np.where(state > 0, state, 1)).astype(np.float32)
+        return self._board().flatten()
 
-    def get_score(self):
+    def get_score(self) -> int:
         return self.score
 
-    def get_max_tile(self):
-        return np.max(self.game_board.get_board())
+    def get_max_tile(self) -> int:
+        return np.max(self._board())
+
+    def get_episode_reward(self) -> float:
+        return self.episode_reward

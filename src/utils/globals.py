@@ -5,6 +5,8 @@ ACTION_DOWN = 1
 ACTION_LEFT = 2
 ACTION_RIGHT = 3
 
+ACTION_SET = (ACTION_UP, ACTION_DOWN, ACTION_LEFT, ACTION_RIGHT)
+
 BASE_DIR = os.path.abspath(os.path.dirname(os.getcwd()))
 ASSETS_DIR = os.path.abspath(os.path.join(BASE_DIR, "assets"))
 LOG_DIR = os.path.abspath(os.path.join(BASE_DIR, "logs"))

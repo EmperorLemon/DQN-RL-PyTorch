@@ -12,6 +12,7 @@ class DQN(nn.Module):
     ):
         layers = []
         in_features = input_size
+        
         for hidden_size in hidden_layers:
             layers.append(nn.Linear(in_features, hidden_size))
             layers.append(nn.LayerNorm(hidden_size))

@@ -60,7 +60,7 @@ class Board:
 
 class BoardLogic:
     @staticmethod
-    def move(prev_board: np.ndarray, board: np.ndarray, action: int) -> tuple[bool, int]:
+    def move(board: np.ndarray, action: int) -> tuple[np.ndarray, bool, int]:
         """
         Perform a move on the board.
 
@@ -71,6 +71,9 @@ class BoardLogic:
         Returns:
             Tuple[np.ndarray, bool, int]: New board state, whether move was valid, and score.
         """
+        prev_board = board.copy()
+        new_board = board.copy()
+        
         score: int = 0
 
         def merge(row):
@@ -91,40 +94,44 @@ class BoardLogic:
             return np.pad(row, (0, 4 - len(row)), "constant")
 
         if action == ACTION_UP:
-            board = np.apply_along_axis(merge, 0, board)
+            new_board = np.apply_along_axis(merge, 0, new_board)
         elif action == ACTION_DOWN:
-            board = np.apply_along_axis(lambda x: merge(x[::-1])[::-1], 0, board)
+            new_board = np.apply_along_axis(lambda x: merge(x[::-1])[::-1], 0, new_board)
         elif action == ACTION_LEFT:
-            board = np.apply_along_axis(merge, 1, board)
+            new_board = np.apply_along_axis(merge, 1, new_board)
         elif action == ACTION_RIGHT:
-            board = np.apply_along_axis(lambda x: merge(x[::-1])[::-1], 1, board)
+            new_board = np.apply_along_axis(lambda x: merge(x[::-1])[::-1], 1, new_board)
         else:
             raise ValueError(f"Invalid action: {action}")
 
-        is_valid_move: bool = not np.array_equal(prev_board, board)
+        is_valid_move: bool = not np.array_equal(prev_board, new_board)
 
-        return is_valid_move, score
+        return new_board, is_valid_move, score
     
     @staticmethod
-    def get_valid_actions(board: np.ndarray) -> list[int]:
-        valid_actions = []
+    def count_similar_tiles(board: np.ndarray) -> int:
+        count = 0
         
-        # Define actions and their weights
-        actions = {ACTION_UP: 1.0, ACTION_DOWN: 3.0, ACTION_LEFT: 3.0, ACTION_RIGHT: 2.0}
+        for i in range(board.shape[0]):
+            for j in range(board.shape[1]):
+                if i < board.shape[0] - 1 and board[i, j] == board[i+1, j] and board[i, j] != 0:
+                    count += 1
+                if j < board.shape[1] - 1 and board[i, j] == board[i, j+1] and board[i, j] != 0:
+                    count += 1
+        return count
+    
+    @staticmethod
+    def sum_different_tiles(board: np.ndarray) -> int:
+        total = 0
         
-        score = 0 
-        
-        for action, weight in actions.items():
-            # Create a copy of the board
-            temp_board = board.copy()
-            
-            valid_move, merged_score = BoardLogic.move(temp_board, board, action)
-            
-            if valid_move:
-                score += merged_score
-                valid_actions.append(action)
-            
-        return valid_actions
+        for i in range(board.shape[0]):
+            for j in range(board.shape[1]):
+                if i < board.shape[0] - 1:
+                    total += abs(board[i, j] - board[i+1, j])
+                if j < board.shape[1] - 1:
+                    total += abs(board[i, j] - board[i, j+1])
+                    
+        return total
 
     @staticmethod
     def game_over(board: np.ndarray) -> bool:

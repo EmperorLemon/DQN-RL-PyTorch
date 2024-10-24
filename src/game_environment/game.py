@@ -42,12 +42,12 @@ class Game(IGame):
     def render(self, renderer):
         renderer.clear_color((252, 251, 244))
 
-        if not self.env.done:
-            renderer.draw_board(self.env.game_board, BOARD_COLORS, padding=5)
-            renderer.draw_text(f"Score: {self.env.score}", center=(400, 75))
-        else:
-            renderer.draw_text(f"Game Over", center=(400, 75))
-            renderer.draw_text(f"Score: {self.env.score}", center=(400, 110))
+        # if not self.env.done:
+        #     renderer.draw_board(self.env.game_board, BOARD_COLORS, padding=5)
+        #     renderer.draw_text(f"Score: {self.env.score}", center=(400, 75))
+        # else:
+        #     renderer.draw_text(f"Game Over", center=(400, 75))
+        #     renderer.draw_text(f"Score: {self.env.score}", center=(400, 110))
 
     def handle_input(self, input):
         if input.get_key_down(K_UP):
@@ -60,4 +60,4 @@ class Game(IGame):
             self.env.step(ACTION_RIGHT)
 
     def is_done(self) -> bool:
-        return self.env.done
+        return False
