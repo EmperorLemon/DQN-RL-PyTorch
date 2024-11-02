@@ -36,7 +36,7 @@ class DQNAgent:
         
         self.optimizer = optim.Adam(self.policy_net.parameters(), lr=self.lr)
         # self.optimizer = optim.SGD(self.policy_net.parameters(), lr=self.lr, momentum=0.9, weight_decay=config.get("WEIGHT_DECAY", 1e-8), nesterov=True)
-        self.criterion = nn.SmoothL1Loss()
+        self.criterion = nn.MSELoss()
         
     def act(self, state: np.ndarray, epsilon: float, valid_actions: list[int]):
         if random.random() <= epsilon:
@@ -56,9 +56,9 @@ class DQNAgent:
         
         return best_action
             
-    def optimize_model(self):
+    def optimize_model(self) -> float:
         if len(self.memory) < self.batch_size:
-            return
+            return 0.0
         
         transitions = self.memory.sample(self.batch_size)
         batch = Transition(*zip(*transitions))
@@ -87,6 +87,8 @@ class DQNAgent:
         # In-place gradient clipping
         # torch.nn.utils.clip_grad_value_(self.policy_net.parameters(), 100)
         self.optimizer.step()
+        
+        return loss.item()
     
     def update_target_network(self):
         self.target_net.load_state_dict(self.policy_net.state_dict())

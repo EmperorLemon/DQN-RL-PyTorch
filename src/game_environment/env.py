@@ -26,13 +26,11 @@ class GameEnv(IEnv):
         self.board = Board(size=board_size)
         
         self.score = 0
-        self.episode_reward = 0
 
     def reset(self):
         self.board.reset()
 
         self.score = 0
-        self.episode_reward = 0
 
         return self.get_state()
     
@@ -78,12 +76,7 @@ class GameEnv(IEnv):
             reward = -2
         
         done = BoardLogic.game_over(self._board())
-            
-        if done:
-            reward -= 10
-            
-        self.episode_reward += reward
-
+        
         return self.get_state(), reward, done
 
     def get_state(self) -> np.ndarray:
@@ -94,6 +87,3 @@ class GameEnv(IEnv):
 
     def get_max_tile(self) -> int:
         return np.max(self._board())
-
-    def get_episode_reward(self) -> float:
-        return self.episode_reward
