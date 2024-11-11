@@ -1,9 +1,8 @@
-HYPERPARAMETERS = {
+HYPERPARAMETERS: dict = {
     "BATCH_SIZE": 128,
-    "MAX_EPISODES": 2000,
-    "EPS_START": 0.05,
-    "EPS_END": 1e-5,
-    "EPS_DECAY": 0.999,
+    "EPS_START": 0.1,
+    "EPS_END": 0.001,
+    "EPS_DECAY": 0.993,
     "LR": 1e-4,
-    "HIDDEN_LAYERS": [128, 64, 32]
+    "HIDDEN_LAYERS": [128, 128]
 }
