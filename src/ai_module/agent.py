@@ -44,22 +44,40 @@ class DQNAgent:
     def act(self, state: np.ndarray, epsilon: float, valid_actions: list[int], eval: bool = True):
         """
         Select an action using epsilon-greedy policy
+        
+        Args:
+            state: Current game state as numpy array
+            epsilon: Exploration rate (0-1)
+            valid_actions: List of valid actions at current state
+            eval: If True, keeps network in eval mode (for evaluation/testing)
         """
+        
+        # Exploration: randomly sample from valid actions with probability epsilon
         if random.random() < epsilon:
             return random.choice(valid_actions)
         
+        # Exploitation: Use policy network to select best action
+        
+        # Convert state to tensor and add batch dimension
         state = torch.from_numpy(state).float().unsqueeze(0).to(self.device)
         
+        # Disable dropout for prediction
         self.policy_net.eval()
         
+        # Get Q-values without computing gradients
         with torch.no_grad():
             q_values = self.policy_net(state)
          
-        # Filter Q-values for only valid actions and select best action
+        # Mask invalid actions by only considering Q-values of valid actions
         valid_q_values = q_values[0][valid_actions]
+        
+        # Select highest Q-value action
         best_action_idx = valid_q_values.argmax().item()
+        
+        # Map back to original action space
         best_action = valid_actions[best_action_idx]
         
+        # Return to training mode if not in evaluation
         if not eval:
             self.policy_net.train()
     
@@ -90,7 +108,7 @@ class DQNAgent:
         # Current Q-values
         q_values = self.policy_net(state_batch).gather(1, action_batch.unsqueeze(1))
         
-        # Next state values (following Bellman equation)
+        # Next state Q-values (following Bellman equation)
         with torch.no_grad():
             next_q_values = self.target_net(next_state_batch).max(1)[0]
         
