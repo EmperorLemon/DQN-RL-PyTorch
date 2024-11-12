@@ -25,11 +25,13 @@ class GameEnv(IEnv):
         self.board = Board(size=board_size)
         
         self.score = 0
+        self.done = False
 
     def reset(self):
         self.board.reset()
 
         self.score = 0
+        self.done = False
 
         return self.get_state()
     
@@ -88,9 +90,9 @@ class GameEnv(IEnv):
             # Penalize invalid moves
             reward = -2
         
-        done = BoardLogic.game_over(self._board())
+        self.done = BoardLogic.game_over(self._board())
         
-        return self.get_state(), reward, done
+        return self.get_state(), reward, self.done
 
     def get_state(self) -> np.ndarray:
         state = self._board().flatten()

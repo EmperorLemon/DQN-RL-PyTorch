@@ -1,3 +1,6 @@
+from game_module.app import App
+from game_module.game import Game
+
 from game_environment.env import GameEnv
 
 from ai_module.agent import DQNAgent
@@ -12,10 +15,7 @@ from utils.utils import *
 from config import HYPERPARAMETERS
 
 BOARD_SIZE = 4
-IS_TRAIN = True
-
-BOARD_SIZE = 4
-IS_TRAIN = True # Change this to False to test model
+IS_TRAIN = False # Change this to False to test model
 
 def main() -> int:
     check_cuda()
@@ -32,7 +32,10 @@ def main() -> int:
         play_2048(env, agent, 10)
         writer.close()
     else:
-        play_2048(env, agent, 20)
+        game = Game(env, agent)
+        
+        app = App(800, 600, game)
+        app.run()
         
     # Uncomment this to add model diagram to tensorboard
     # dummy_input = torch.zeros(1, env.board_size * env.board_size).to(agent.device)
