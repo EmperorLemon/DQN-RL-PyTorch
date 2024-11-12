@@ -14,23 +14,29 @@ from config import HYPERPARAMETERS
 BOARD_SIZE = 4
 IS_TRAIN = True
 
+BOARD_SIZE = 4
+IS_TRAIN = True # Change this to False to test model
+
 def main() -> int:
     check_cuda()
     
     env = GameEnv(BOARD_SIZE)
     agent = DQNAgent(BOARD_SIZE, HYPERPARAMETERS)
     
-    writer = SummaryWriter(get_log_path(LOGS_DIR, "2048_DQN"))
-    
-    trainer = Trainer(env=env, agent=agent, writer=writer, config=HYPERPARAMETERS)
-    
     if IS_TRAIN:
+        writer = SummaryWriter(get_log_path(LOGS_DIR, "2048_DQN"))
+    
+        trainer = Trainer(env=env, agent=agent, writer=writer, config=HYPERPARAMETERS)
         trainer.train()
+        
         play_2048(env, agent, 10)
+        writer.close()
     else:
         play_2048(env, agent, 20)
-
-    writer.close()
+        
+    # Uncomment this to add model diagram to tensorboard
+    # dummy_input = torch.zeros(1, env.board_size * env.board_size).to(agent.device)
+    # writer.add_graph(agent.policy_net, dummy_input)
 
     return 0
 

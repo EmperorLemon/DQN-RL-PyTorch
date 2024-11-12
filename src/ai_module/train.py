@@ -92,13 +92,13 @@ class Trainer:
                     
                 # Update progress bar with both train and eval metrics
                 progress_bar.set_postfix({
-                    "train_reward": f"{train_metrics["reward"]:.2f}",
+                    "train_reward": f"{train_metrics['reward']:.2f}",
                     "eval_reward": f"{eval_metrics['avg_reward']:.2f}",
                     "max_tile": eval_metrics['avg_max_tile']
                 })
             else:
                 # Regular training progress
-                progress_bar.set_postfix({"reward": f"{train_metrics["reward"]:.2f}", "loss": f"{train_metrics["loss"]:.2f}"})
+                progress_bar.set_postfix({"reward": f"{train_metrics['reward']:.2f}", "loss": f"{train_metrics['loss']:.2f}"})
                 
             # Not using LR scheduler since it was having issues
             # self.scheduler.step(total_loss)
